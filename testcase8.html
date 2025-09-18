@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rotex Forex Calculator</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>ROTEX FOREX CALCULATOR</h1>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <!-- Pip Difference -->
+      <div class="formulaBox">
+        <h3>Pip Difference</h3>
+        <label>Pair (e.g. EURUSD)</label>
+        <input id="pipPair" placeholder="EURUSD" value="EURUSD">
+        <label>Opening Price</label>
+        <input id="pipOpen" type="number" step="0.00001">
+        <label>Closing Price</label>
+        <input id="pipClose" type="number" step="0.00001">
+        <div class="result" id="pipDiffResult">Pip Difference: -</div>
+        <div class="small">Note: JPY pairs use pip = 0.01; other pairs use pip = 0.0001.</div>
+      </div>
+
+      <!-- Margin Calculator -->
+      <div class="formulaBox">
+        <h3>Forex Margin Calculator</h3>
+        <label>Pair (BASEQUOTE, e.g. AUDCAD)</label>
+        <input id="pair" placeholder="AUDCAD" value="AUDCAD">
+
+        <label>Lot Type</label>
+        <select id="lotType" onchange="handleLotTypeChange('lotType', 'customLotInput')">
+          <option value="standard">Standard (100,000)</option>
+          <option value="mini">Mini (10,000)</option>
+          <option value="micro">Micro (1,000)</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <input id="customLotInput" type="number" step="1" placeholder="Enter custom lot size"
+          style="display:none; margin-top:6px;">
+
+        <label>Lots</label>
+        <input id="lots" type="number" step="0.01" value="1">
+        <label>Current Market Price</label>
+        <input id="price" type="number" step="0.00001" value="">
+        <label>Leverage (enter 100 for 1:100)</label>
+        <input id="leverage" type="number" step="1" value="100">
+        <label>Cross Rate (ONLY if pair is non-USD): enter 1 USDtoQUOTE</label>
+        <input id="crossRate" type="number" step="0.00001" placeholder="e.g. 1.38104">
+        <label>Account Equity (USD)</label>
+        <input id="equity" type="number" step="0.01" value="1000">
+        <div class="formulaText" id="marginFormula">Formula: -</div>
+        <div class="result" id="marginInQuoteResult">Margin (quote currency): -</div>
+        <div class="result" id="marginUSDResult">Margin (USD): -</div>
+        <div class="result" id="blockedResult">Blocked Margin (USD): -</div>
+        <div class="result" id="marginLevelResult">Margin Level %: -</div>
+      </div>
+
+      <!-- Pip Value & Spread Cost -->
+      <div class="formulaBox">
+        <h3>Pip Value & Spread Cost</h3>
+        <label>Pair</label>
+        <input id="pvPair" placeholder="AUDCAD" value="AUDCAD">
+
+        <label>Lot Type</label>
+        <select id="pvLot" onchange="handleLotTypeChange('pvLot', 'pvCustomLotInput')">
+          <option value="standard">Standard</option>
+          <option value="mini">Mini</option>
+          <option value="micro">Micro</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <input id="pvCustomLotInput" type="number" step="1" placeholder="Enter custom lot size"
+          style="display:none; margin-top:6px;">
+
+        <label>Price</label>
+        <input id="pvPrice" type="number" step="0.00001" value="">
+        <label>Cross Rate (if non-USD)</label>
+        <input id="pvCross" type="number" step="0.00001" placeholder="e.g. 1.38104">
+        <label>Spread (pips)</label>
+        <input id="pvSpread" type="number" step="0.01" value="">
+        <label>Lots (for spread cost)</label>
+        <input id="pvSpreadLots" type="number" step="0.01" value="1">
+        <div class="result" id="pipValueResult">Pip value (1 lot in USD): -</div>
+        <div class="result" id="spreadCostResult">Spread cost (USD): -</div>
+      </div>
+
+      <!-- Profit / Loss -->
+      <div class="formulaBox">
+        <h3>Profit / Loss (USD)</h3>
+        <label>Pair</label>
+        <input id="plPair" placeholder="AUDCAD" value="AUDCAD">
+
+        <label>Lot Type</label>
+        <select id="plLotType" onchange="handleLotTypeChange('plLotType', 'plCustomLotInput')">
+          <option value="standard">Standard</option>
+          <option value="mini">Mini</option>
+          <option value="micro">Micro</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <input id="plCustomLotInput" type="number" step="1" placeholder="Enter custom lot size"
+          style="display:none; margin-top:6px;">
+
+        <label>Lots</label>
+        <input id="plLots" type="number" step="0.01" value="1">
+        <label>Open Price</label>
+        <input id="plOpen" type="number" step="0.00001">
+        <label>Close Price</label>
+        <input id="plClose" type="number" step="0.00001">
+        <label>Trade Type</label>
+        <select id="plType">
+          <option value="buy">Buy (Long)</option>
+          <option value="sell">Sell (Short)</option>
+        </select>
+        <label>Cross Rate (if non-USD)</label>
+        <input id="plCross" type="number" step="0.00001" placeholder="e.g. 1.38104">
+        <div class="result" id="plResult">Profit/Loss (USD): -</div>
+      </div>
+
+      <!-- Point Value of 1 Lot -->
+      <div class="formulaBox">
+        <h3>Point Value of 1 Lot</h3>
+        <label>Pair</label>
+        <input id="pv1Pair" placeholder="EURUSD" value="EURUSD">
+
+        <label>Lot Type</label>
+        <select id="pv1Lot" onchange="handleLotTypeChange('pv1Lot', 'pv1CustomLotInput')">
+          <option value="standard">Standard</option>
+          <option value="mini">Mini</option>
+          <option value="micro">Micro</option>
+          <option value="custom">Custom</option>
+        </select>
+
+        <input id="pv1CustomLotInput" type="number" step="1" placeholder="Enter custom lot size"
+          style="display:none; margin-top:6px;">
+
+        <label>Price</label>
+        <input id="pv1Price" type="number" step="0.00001" value="">
+        <label>Cross Rate (if non-USD)</label>
+        <input id="pv1Cross" type="number" step="0.00001" placeholder="e.g. 1.38104">
+        <div class="result" id="pointValueResult">Point Value (1 lot): -</div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p align="center">Built by 4noris</p>
+  </footer>
+
+  <body>
+    <script>
+    function handleLotTypeChange(selectId, customInputId) {
+  const lotType = document.getElementById(selectId).value;
+  const customInput = document.getElementById(customInputId);
+  if (lotType === 'custom') {
+    customInput.style.display = 'block';
+  } else {
+    customInput.style.display = 'none';
+    customInput.value = '';
+  }
+}
+
+function detectPipSize(pair) {
+  const metals = ['XAUUSD', 'XAUAUD', 'XPDUSD', 'XAGAUD', 'XAGEUR', 'XAGUSD', 'XAUEUR', 'XPTUSD', 'XALUSD'];
+  const indices = ['AUS200', 'CHINA50', 'ESP35', 'EU50', 'FRA40', 'GER40', 'HK50', 'JPN225', 'UK100', 'US100', 'US30', 'US500'];
+  const cryptos = ['ADAUSD', 'ATOUSD', 'BCHUSD', 'BNBUSD', 'BTCUSD', 'DOGUSD', 'DOTUSD', 'ETHUSD', 'LTCUSD', 'SHBUSD', 'SOLUSD', 'TRXUSD', 'XRPUSD'];
+
+  pair = pair.toUpperCase();
+  if (pair.endsWith('JPY')) return 0.01;
+  if (metals.includes(pair)) return 0.01;
+  if (indices.includes(pair)) return 1;
+  if (cryptos.includes(pair)) return 0.1;
+  return 0.0001;
+}
+
+function contractSize(lotType, customLotSize) {
+  switch (lotType.toLowerCase()) {
+    case 'standard': return 100000;
+    case 'mini': return 10000;
+    case 'micro': return 1000;
+    case 'custom': return parseFloat(customLotSize) || 0;
+    default: return 0;
+  }
+}
+
+function calcPipDiff() {
+  const p1 = parseFloat(document.getElementById('pipOpen').value);
+  const p2 = parseFloat(document.getElementById('pipClose').value);
+  const pair = document.getElementById('pipPair').value || '';
+  const out = document.getElementById('pipDiffResult');
+
+  if (isNaN(p1) || isNaN(p2)) {
+    out.innerText = '⚠️ Enter both prices';
+    return;
+  }
+
+  const pip = detectPipSize(pair);
+  const pips = (p2 - p1) / pip;
+
+  out.innerText = `Pip Difference: ${pips.toFixed(2)} pips (pip size ${pip})`;
+}
+
+function calculateMargin() {
+  const pair = (document.getElementById('pair').value || '').toUpperCase();
+  const lotType = document.getElementById('lotType').value;
+  const customLotSize = document.getElementById('customLotInput').value;
+  const lots = parseFloat(document.getElementById('lots').value);
+  const price = parseFloat(document.getElementById('price').value);
+  const leverage = parseFloat(document.getElementById('leverage').value);
+  const crossRate = parseFloat(document.getElementById('crossRate').value);
+  const equity = parseFloat(document.getElementById('equity').value);
+
+  const formulaEl = document.getElementById('marginFormula');
+  const inQuoteEl = document.getElementById('marginInQuoteResult');
+  const usdEl = document.getElementById('marginUSDResult');
+  const blockedEl = document.getElementById('blockedResult');
+  const mlEl = document.getElementById('marginLevelResult');
+
+  if (!pair || pair.length < 6 || isNaN(lots) || isNaN(price) || isNaN(leverage) || lots <= 0 || leverage <= 0) {
+    formulaEl.innerText = 'Formula: -';
+    inQuoteEl.innerText = '-';
+    usdEl.innerText = '-';
+    blockedEl.innerText = '-';
+    mlEl.innerText = '-';
+    return;
+  }
+
+  const base = pair.slice(0, 3);
+  const quote = pair.slice(3);
+  const contract = contractSize(lotType, customLotSize);
+
+  if (contract <= 0) {
+    formulaEl.innerText = 'Formula: ⚠️ Invalid lot type or custom lot size';
+    inQuoteEl.innerText = '-';
+    usdEl.innerText = '-';
+    blockedEl.innerText = '-';
+    mlEl.innerText = '-';
+    return;
+  }
+
+  let marginInQuote = null, marginUSD = null, formulaText = '';
+
+  if (quote === 'USD') {
+    marginUSD = (lots * contract * price) / leverage;
+    marginInQuote = marginUSD;
+    formulaText = '((lots*contract*price)/leverage) — USD quote';
+  } else if (base === 'USD') {
+    marginInQuote = (lots * contract) / leverage;
+    marginUSD = marginInQuote * price;
+    formulaText = '((lots*contract)/leverage)*price — USD base';
+  } else {
+    marginInQuote = (lots * contract * price) / leverage;
+    if (!crossRate || crossRate <= 0) {
+      formulaEl.innerText = 'Formula: Convert using cross rate';
+      inQuoteEl.innerText = `Margin (${quote}): ${marginInQuote.toFixed(6)} ${quote}`;
+      usdEl.innerText = 'Margin (USD): ⚠️ Enter cross rate';
+      blockedEl.innerText = '-';
+      mlEl.innerText = '-';
+      return;
+    }
+    marginUSD = marginInQuote / crossRate;
+    formulaText = '((lots*contract*price)/leverage)/crossRate — non-USD pair';
+  }
+
+  formulaEl.innerText = 'Formula: ' + formulaText;
+  inQuoteEl.innerText = `Margin (${quote}): ${marginInQuote.toFixed(6)} ${quote}`;
+  usdEl.innerText = `Margin (USD): $${marginUSD.toFixed(6)}`;
+  blockedEl.innerText = `Blocked Margin (USD): $${marginUSD.toFixed(6)}`;
+
+  if (equity && equity > 0) {
+    const marginLevel = (equity / marginUSD) * 100;
+    mlEl.innerText = `Margin Level %: ${marginLevel.toFixed(2)}%`;
+  } else {
+    mlEl.innerText = 'Margin Level %: ⚠️ Enter valid equity';
+  }
+}
+
+function calculatePipAndSpread() {
+  const pair = (document.getElementById('pvPair').value || '').toUpperCase();
+  const lotType = document.getElementById('pvLot').value;
+  const customLotSize = document.getElementById('pvCustomLotInput').value;
+  const price = parseFloat(document.getElementById('pvPrice').value);
+  const cross = parseFloat(document.getElementById('pvCross').value);
+  const spreadPips = parseFloat(document.getElementById('pvSpread').value);
+  let spreadLots = parseFloat(document.getElementById('pvSpreadLots').value);
+  const pipOut = document.getElementById('pipValueResult');
+  const scOut = document.getElementById('spreadCostResult');
+
+  if (!pair || isNaN(spreadPips)) {
+    pipOut.innerText = '⚠️ Enter pair and spread';
+    scOut.innerText = '-';
+    return;
+  }
+
+  if (isNaN(spreadLots) || spreadLots <= 0) spreadLots = 1;
+
+  const pipSize = detectPipSize(pair);
+  const contract = contractSize(lotType, customLotSize);
+  const base = pair.slice(0, 3);
+  const quote = pair.slice(3);
+
+  if (contract <= 0) {
+    pipOut.innerText = '⚠️ Invalid lot type or custom lot size';
+    scOut.innerText = '-';
+    return;
+  }
+
+  let pipValueUSD;
+
+  if (quote === 'USD') {
+    pipValueUSD = contract * pipSize;
+  } else if (base === 'USD') {
+    if (!price || isNaN(price) || price <= 0) {
+      pipOut.innerText = '⚠️ Enter valid price';
+      scOut.innerText = '-';
+      return;
+    }
+    pipValueUSD = (contract * pipSize) / price;
+  } else {
+    if (!cross || isNaN(cross) || cross <= 0) {
+      pipOut.innerText = '⚠️ Enter valid cross rate';
+      scOut.innerText = '-';
+      return;
+    }
+    pipValueUSD = (contract * pipSize) / cross;
+  }
+
+  pipOut.innerText = `Pip value (1 lot USD): $${pipValueUSD.toFixed(8)}`;
+  const cost = spreadPips * pipValueUSD * spreadLots;
+  scOut.innerText = `Spread cost (USD) for ${spreadLots} lot(s): $${cost.toFixed(6)}`;
+}
+
+function calculatePL() {
+  const pair = (document.getElementById('plPair').value || '').toUpperCase().trim();
+  const lotType = document.getElementById('plLotType').value;
+  const customLotSize = document.getElementById('plCustomLotInput').value;
+  const lots = parseFloat(document.getElementById('plLots').value);
+  const openPrice = parseFloat(document.getElementById('plOpen').value);
+  const closePrice = parseFloat(document.getElementById('plClose').value);
+  const tradeType = document.getElementById('plType').value;
+  const crossRate = parseFloat(document.getElementById('plCross').value);
+  const out = document.getElementById('plResult');
+
+  if (isNaN(lots) || isNaN(openPrice) || isNaN(closePrice)) {
+    out.innerText = '⚠️ Enter lots, open price, and close price';
+    return;
+  }
+
+  const pipSize = detectPipSize(pair);
+  const contract = contractSize(lotType, customLotSize);
+  const base = pair.slice(0, 3);
+  const quote = pair.slice(3);
+
+  if (contract <= 0) {
+    out.innerText = '⚠️ Invalid lot type or custom lot size';
+    return;
+  }
+
+  let pipDiff = tradeType === 'buy'
+    ? (closePrice - openPrice) / pipSize
+    : (openPrice - closePrice) / pipSize;
+
+  let plUSD = 0;
+
+  if (quote === 'USD') {
+    plUSD = pipDiff * contract * lots * pipSize;
+  } else if (base === 'USD') {
+    if (isNaN(closePrice) || closePrice <= 0) {
+      out.innerText = '⚠️ Enter valid close price';
+      return;
+    }
+    plUSD = (pipDiff * contract * lots * pipSize) / closePrice;
+  } else {
+    if (isNaN(crossRate) || crossRate <= 0) {
+      out.innerText = '⚠️ Enter valid cross rate';
+      return;
+    }
+    plUSD = (pipDiff * contract * lots * pipSize) / crossRate;
+  }
+
+  out.innerText = `Profit/Loss (USD): $${plUSD.toFixed(6)} (${pipDiff.toFixed(2)} pips)`;
+}
+
+function calculatePointValue() {
+  const pair = (document.getElementById('pv1Pair').value || '').toUpperCase();
+  const lotType = document.getElementById('pv1Lot').value;
+  const customLotSize = document.getElementById('pv1CustomLotInput').value;
+  const price = parseFloat(document.getElementById('pv1Price').value);
+  const cross = parseFloat(document.getElementById('pv1Cross').value);
+  const out = document.getElementById('pointValueResult');
+
+  if (!pair || pair.length !== 6) {
+    out.innerText = '⚠️ Enter valid pair (e.g., EURUSD)';
+    return;
+  }
+
+  const pipSize = detectPipSize(pair);
+  const contract = contractSize(lotType, customLotSize);
+  const base = pair.slice(0,3);
+  const quote = pair.slice(3);
+
+  if (contract <= 0) {
+    out.innerText = '⚠️ Invalid lot type or custom lot size';
+    return;
+  }
+
+  let pointValueUSD = 0;
+
+  if (quote === 'USD') {
+    pointValueUSD = contract * pipSize;
+  } else if (base === 'USD') {
+    if (!price || isNaN(price) || price <= 0) {
+      out.innerText = '⚠️ Enter valid market price';
+      return;
+    }
+    pointValueUSD = (contract * pipSize) / price;
+  } else {
+    if (!cross || isNaN(cross) || cross <= 0) {
+      out.innerText = '⚠️ Enter valid cross rate';
+      return;
+    }
+    pointValueUSD = (contract * pipSize) / cross;
+  }
+
+  out.innerText = `Point Value (1 lot): $${pointValueUSD.toFixed(6)}`;
+}
+
+function updateAll() {
+  calcPipDiff();
+  calculateMargin();
+  calculatePipAndSpread();
+  calculatePL();
+  calculatePointValue();
+}
+</script>
+</body>
+</html>
